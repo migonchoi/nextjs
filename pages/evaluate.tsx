@@ -20,24 +20,24 @@ export default function Evaluate() {
     setForm({ ...form, scores: updated });
   };
 
- const handleSubmit = (e: React.FormEvent) => {
-  e.preventDefault();
+const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault(); // 이게 핵심!
+  
   if (!form.professor) {
     alert('Please select a professor.');
     return;
   }
 
-  // 기존 데이터 불러오기
   const existing = JSON.parse(localStorage.getItem('evaluations') || '{}');
-
-  // 새 데이터 추가
   existing[form.professor] = form.scores;
-
-  // 저장
   localStorage.setItem('evaluations', JSON.stringify(existing));
 
   alert('Thank you for your evaluation!');
+  
+  // 이동 없이 결과 페이지로 바로 갈 수 있도록:
+  window.location.href = '/results';
 };
+
 
 
   return (
