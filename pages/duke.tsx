@@ -2,12 +2,8 @@ import Link from 'next/link';
 
 const departments = {
   'Mechanical Engineering and Materials Science': [
-    'Dr. David Mitzi',
+    'Dr. bong bong bong',
 
-  ],
-  'Electrical and Computer Engineering': [
-    'Dr. Yiran Chen',
-    'Dr. Jeffrey Glass'
   ]
 };
 
