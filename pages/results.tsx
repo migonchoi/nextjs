@@ -1,29 +1,43 @@
-// pages/results.tsx (Radar chart view page)
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer } from 'recharts';
+import { useEffect, useState } from 'react';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 
-const data = [
-  { category: 'Personal Character', score: 4.2 },
-  { category: 'Lab Environment', score: 3.8 },
-  { category: 'Manuscript Guidance', score: 4.5 },
-  { category: 'Research Direction Setting', score: 4.0 },
-  { category: 'Career Support & Networking', score: 3.6 },
-  { category: 'Recommendation Letter Quality', score: 4.3 },
+const categories = [
+  'Personal Character',
+  'Lab Environment',
+  'Manuscript Guidance',
+  'Research Direction Setting',
+  'Career Support & Networking',
+  'Recommendation Letter Quality',
 ];
 
 export default function Results() {
+  const [scores, setScores] = useState<number[]>([]);
+  const professor = 'Dr. bong bong bong'; // 일단 하드코딩
+
+  useEffect(() => {
+    const stored = localStorage.getItem('evaluations');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      if (parsed[professor]) {
+        setScores(parsed[professor]);
+      }
+    }
+  }, []);
+
+  const data = categories.map((subject, i) => ({
+    subject,
+    A: scores[i] || 0,
+  }));
+
   return (
     <main className="p-8">
-      <h1 className="text-3xl font-bold mb-6">Evaluation Results: Dr. bong bong bong</h1>
-      <div className="w-full h-96">
-        <ResponsiveContainer>
-          <RadarChart data={data} outerRadius="80%">
-            <PolarGrid />
-            <PolarAngleAxis dataKey="category" />
-            <PolarRadiusAxis domain={[0, 5]} tickCount={6} />
-            <Radar name="Score" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-          </RadarChart>
-        </ResponsiveContainer>
-      </div>
+      <h1 className="text-3xl font-bold mb-6">Evaluation Results: {professor}</h1>
+      <RadarChart cx={300} cy={250} outerRadius={150} width={600} height={500} data={data}>
+        <PolarGrid />
+        <PolarAngleAxis dataKey="subject" />
+        <PolarRadiusAxis angle={30} domain={[0, 5]} />
+        <Radar name="Score" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+      </RadarChart>
     </main>
   );
 }

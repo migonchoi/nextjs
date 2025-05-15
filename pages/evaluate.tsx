@@ -20,11 +20,25 @@ export default function Evaluate() {
     setForm({ ...form, scores: updated });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Submit to backend or local storage
-    alert('Thank you for your evaluation!');
-  };
+ const handleSubmit = (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!form.professor) {
+    alert('Please select a professor.');
+    return;
+  }
+
+  // 기존 데이터 불러오기
+  const existing = JSON.parse(localStorage.getItem('evaluations') || '{}');
+
+  // 새 데이터 추가
+  existing[form.professor] = form.scores;
+
+  // 저장
+  localStorage.setItem('evaluations', JSON.stringify(existing));
+
+  alert('Thank you for your evaluation!');
+};
+
 
   return (
     <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-8">
