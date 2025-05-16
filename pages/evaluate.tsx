@@ -35,7 +35,7 @@ const handleSubmit = (e: React.FormEvent) => {
   alert('Thank you for your evaluation!');
   
   // 이동 없이 결과 페이지로 바로 갈 수 있도록:
-  window.location.href = '/results';
+  window.location.href = '/labs';
 };
 
 
