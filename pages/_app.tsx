@@ -7,7 +7,12 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-100 shadow">
-        <div className="text-xl font-bold">PhD Safe</div>
+        {/* 🔽 로고를 클릭하면 /about으로 이동하게 수정 */}
+        <Link href="/about">
+          <div className="text-xl font-bold cursor-pointer hover:text-blue-700">
+            PhD Safe
+          </div>
+        </Link>
         <div className="space-x-4">
           <Link href="/about" className="text-blue-700 hover:underline">About Us</Link>
           <Link href="/labs" className="text-blue-700 hover:underline">Labs</Link>
