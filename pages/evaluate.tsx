@@ -1,5 +1,6 @@
-// pages/evaluate.tsx
-import { useState } from 'react';
+// pages/labs.tsx
+import { useEffect, useState } from 'react';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import professorHierarchy from '../data/professor_hierarchy';
 
 const categories = [
@@ -11,42 +12,46 @@ const categories = [
   'Recommendation Letter Quality',
 ];
 
-export default function Evaluate() {
+export default function Labs() {
   const [selectedUni, setSelectedUni] = useState('');
   const [selectedSchool, setSelectedSchool] = useState('');
   const [selectedDept, setSelectedDept] = useState('');
   const [selectedProf, setSelectedProf] = useState('');
-  const [scores, setScores] = useState(Array(6).fill(3));
-
-  const handleChange = (index: number, value: number) => {
-    const updated = [...scores];
-    updated[index] = value;
-    setScores(updated);
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedProf) {
-      alert('Please select a professor.');
-      return;
-    }
-
-    const existing = JSON.parse(localStorage.getItem('evaluations') || '{}');
-    const prev = existing[selectedProf] || [];
-    existing[selectedProf] = [...prev, scores];
-    localStorage.setItem('evaluations', JSON.stringify(existing));
-
-    alert('Thank you for your evaluation!');
-    window.location.href = '/labs';
-  };
+  const [averages, setAverages] = useState<number[]>([]);
 
   const schools = professorHierarchy.find(u => u.university === selectedUni)?.schools || [];
   const departments = schools.find(s => s.school === selectedSchool)?.departments || [];
   const professors = departments.find(d => d.department === selectedDept)?.professors || [];
 
+  useEffect(() => {
+    if (!selectedProf) return;
+    const stored = localStorage.getItem('evaluations');
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const allScores = parsed[selectedProf] || [];
+      if (allScores.length > 0) {
+        const avg = Array(6).fill(0);
+        allScores.forEach((scores: number[]) => {
+          scores.forEach((val, i) => {
+            avg[i] += val;
+          });
+        });
+        const final = avg.map((v) => parseFloat((v / allScores.length).toFixed(2)));
+        setAverages(final);
+      } else {
+        setAverages([]);
+      }
+    }
+  }, [selectedProf]);
+
+  const data = categories.map((subject, i) => ({
+    subject,
+    A: averages[i] || 0,
+  }));
+
   return (
-    <form onSubmit={handleSubmit} className="max-w-xl mx-auto p-8">
-      <h1 className="text-3xl font-bold mb-6">Evaluate a Professor</h1>
+    <main className="p-8">
+      <h1 className="text-3xl font-bold mb-6">Evaluation Results</h1>
 
       <label className="block mb-4">
         <span className="block mb-2">Select University</span>
@@ -95,33 +100,33 @@ export default function Evaluate() {
       )}
 
       {selectedDept && (
-        <label className="block mb-4">
+        <label className="block mb-6 max-w-sm">
           <span className="block mb-2">Select Professor</span>
-          <select value={selectedProf} onChange={(e) => setSelectedProf(e.target.value)} className="w-full p-2 border rounded">
+          <select
+            value={selectedProf}
+            onChange={(e) => setSelectedProf(e.target.value)}
+            className="w-full p-2 border rounded"
+          >
             <option value="">-- Choose --</option>
-            {professors.map((prof) => (
-              <option key={prof} value={prof}>{prof}</option>
+            {professors.map((name) => (
+              <option key={name} value={name}>{name}</option>
             ))}
           </select>
         </label>
       )}
 
-      {selectedProf && categories.map((cat, i) => (
-        <div key={cat} className="mb-4">
-          <label className="block mb-1">{cat}</label>
-          <input
-            type="range"
-            min={1}
-            max={5}
-            value={scores[i]}
-            onChange={(e) => handleChange(i, parseInt(e.target.value))}
-            className="w-full"
-          />
-          <span>{scores[i]}</span>
+      {averages.length > 0 ? (
+        <div className="flex justify-center">
+          <RadarChart cx={300} cy={250} outerRadius={150} width={600} height={500} data={data}>
+            <PolarGrid />
+            <PolarAngleAxis dataKey="subject" />
+            <PolarRadiusAxis angle={30} domain={[0, 5]} />
+            <Radar name="Average Score" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+          </RadarChart>
         </div>
-      ))}
-
-      <button type="submit" className="mt-6 px-4 py-2 bg-black text-white rounded">Submit</button>
-    </form>
+      ) : selectedProf ? (
+        <p className="text-gray-500">No evaluation data available for {selectedProf}.</p>
+      ) : null}
+    </main>
   );
 }
