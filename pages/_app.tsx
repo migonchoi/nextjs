@@ -2,17 +2,17 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-100 shadow">
-        {/* 🔽 로고를 클릭하면 /about으로 이동하게 수정 */}
-        <Link href="/about">
-          <div className="text-xl font-bold cursor-pointer hover:text-blue-700">
-            PhD Safe
-          </div>
+        {/* ✅ 이미지 로고로 변경 */}
+        <Link href="/about" className="flex items-center space-x-2">
+          <Image src="/logo.png" alt="PhD Safe Logo" width={120} height={40} />
         </Link>
+
         <div className="space-x-4">
           <Link href="/about" className="text-blue-700 hover:underline">About Us</Link>
           <Link href="/labs" className="text-blue-700 hover:underline">Labs</Link>
