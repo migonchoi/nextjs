@@ -1,4 +1,3 @@
-// pages/_app.tsx
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import Link from "next/link";
@@ -8,7 +7,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <nav className="flex items-center justify-between px-6 py-4 bg-gray-100 shadow">
-        {/* ✅ 이미지 로고로 변경 */}
+        {/* ✅ 이미지 클릭 시 /about 으로 이동 */}
         <Link href="/about" className="flex items-center space-x-2">
           <Image src="/logo.png" alt="PhD Safe Logo" width={120} height={40} />
         </Link>
