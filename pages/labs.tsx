@@ -13,22 +13,15 @@ const categories = [
 ];
 
 export default function Labs() {
+  const [selectedUni, setSelectedUni] = useState('');
+  const [selectedSchool, setSelectedSchool] = useState('');
+  const [selectedDept, setSelectedDept] = useState('');
   const [selectedProf, setSelectedProf] = useState('');
   const [averages, setAverages] = useState<number[]>([]);
-  const [allProfessors, setAllProfessors] = useState<string[]>([]);
 
-  // Flatten all professor names from the hierarchy for the dropdown
-  useEffect(() => {
-    const flatList: string[] = [];
-    professorHierarchy.forEach((u) => {
-      u.schools.forEach((s) => {
-        s.departments.forEach((d) => {
-          d.professors.forEach((p) => flatList.push(p));
-        });
-      });
-    });
-    setAllProfessors(flatList);
-  }, []);
+  const schools = professorHierarchy.find(u => u.university === selectedUni)?.schools || [];
+  const departments = schools.find(s => s.school === selectedSchool)?.departments || [];
+  const professors = departments.find(d => d.department === selectedDept)?.professors || [];
 
   useEffect(() => {
     if (!selectedProf) return;
@@ -60,32 +53,58 @@ export default function Labs() {
     <main className="p-8">
       <h1 className="text-3xl font-bold mb-6">Evaluation Results</h1>
 
-      <label className="block mb-6 max-w-sm">
-        <span className="block mb-2">Select Professor</span>
-        <select
-          value={selectedProf}
-          onChange={(e) => setSelectedProf(e.target.value)}
-          className="w-full p-2 border rounded"
-        >
+      {/* University Dropdown */}
+      <label className="block mb-4">
+        <span className="block mb-2">Select University</span>
+        <select value={selectedUni} onChange={(e) => {
+          setSelectedUni(e.target.value);
+          setSelectedSchool('');
+          setSelectedDept('');
+          setSelectedProf('');
+        }} className="w-full p-2 border rounded">
           <option value="">-- Choose --</option>
-          {allProfessors.map((name) => (
-            <option key={name} value={name}>{name}</option>
+          {professorHierarchy.map((u) => (
+            <option key={u.university} value={u.university}>{u.university}</option>
           ))}
         </select>
       </label>
 
-      {averages.length > 0 ? (
-        <div className="flex justify-center">
-          <RadarChart cx={300} cy={250} outerRadius={150} width={600} height={500} data={data}>
-            <PolarGrid />
-            <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis angle={30} domain={[0, 5]} />
-            <Radar name="Average Score" dataKey="A" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-          </RadarChart>
-        </div>
-      ) : selectedProf ? (
-        <p className="text-gray-500">No evaluation data available for {selectedProf}.</p>
-      ) : null}
-    </main>
-  );
-}
+      {/* School Dropdown */}
+      {selectedUni && (
+        <label className="block mb-4">
+          <span className="block mb-2">Select School</span>
+          <select value={selectedSchool} onChange={(e) => {
+            setSelectedSchool(e.target.value);
+            setSelectedDept('');
+            setSelectedProf('');
+          }} className="w-full p-2 border rounded">
+            <option value="">-- Choose --</option>
+            {schools.map((s) => (
+              <option key={s.school} value={s.school}>{s.school}</option>
+            ))}
+          </select>
+        </label>
+      )}
+
+      {/* Department Dropdown */}
+      {selectedSchool && (
+        <label className="block mb-4">
+          <span className="block mb-2">Select Department</span>
+          <select value={selectedDept} onChange={(e) => {
+            setSelectedDept(e.target.value);
+            setSelectedProf('');
+          }} className="w-full p-2 border rounded">
+            <option value="">-- Choose --</option>
+            {departments.map((d) => (
+              <option key={d.department} value={d.department}>{d.department}</option>
+            ))}
+          </select>
+        </label>
+      )}
+
+      {/* Professor Dropdown */}
+      {selectedDept && (
+        <label className="block mb-6 max-w-sm">
+          <span className="block mb-2">Select Professor</span>
+          <select
+            v
