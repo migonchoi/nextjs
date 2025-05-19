@@ -135,7 +135,6 @@ export default function Evaluate() {
         </label>
       )}
 
-
       {/* Rating */}
       {selection.professor && (
         <>
