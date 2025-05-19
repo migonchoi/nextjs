@@ -23,21 +23,21 @@ export default function Labs() {
     professor: ''
   });
   const [averages, setAverages] = useState<number[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [searchError, setSearchError] = useState(false);
 
-  const getSchools = () => {
-    const uni = professorHierarchy.find(u => u.university === selection.university);
-    return uni ? uni.schools : [];
-  };
-
-  const getDepartments = () => {
-    const school = getSchools().find(s => s.school === selection.school);
-    return school ? school.departments : [];
-  };
-
-  const getProfessors = () => {
-    const dept = getDepartments().find(d => d.department === selection.department);
-    return dept ? dept.professors : [];
-  };
+  const allProfessors = professorHierarchy.flatMap(u =>
+    u.schools.flatMap(s =>
+      s.departments.flatMap(d =>
+        d.professors.map(p => ({
+          name: p,
+          university: u.university,
+          school: s.school,
+          department: d.department
+        }))
+      )
+    )
+  );
 
   useEffect(() => {
     if (!selection.professor) return;
@@ -60,6 +60,39 @@ export default function Labs() {
     }
   }, [selection.professor]);
 
+  useEffect(() => {
+    if (!searchText.trim()) return;
+    const match = allProfessors.find(p =>
+      p.name.toLowerCase() === searchText.trim().toLowerCase()
+    );
+    if (match) {
+      setSelection({
+        university: match.university,
+        school: match.school,
+        department: match.department,
+        professor: match.name
+      });
+      setSearchError(false);
+    } else {
+      setSearchError(true);
+    }
+  }, [searchText]);
+
+  const getSchools = () => {
+    const uni = professorHierarchy.find(u => u.university === selection.university);
+    return uni ? uni.schools : [];
+  };
+
+  const getDepartments = () => {
+    const school = getSchools().find(s => s.school === selection.school);
+    return school ? school.departments : [];
+  };
+
+  const getProfessors = () => {
+    const dept = getDepartments().find(d => d.department === selection.department);
+    return dept ? dept.professors : [];
+  };
+
   const data = categories.map((subject, i) => ({
     subject,
     score: averages[i] || 0
@@ -68,6 +101,22 @@ export default function Labs() {
   return (
     <main className="p-8 mx-auto max-w-full">
       <h1 className="text-3xl font-bold mb-6">Evaluation Results</h1>
+
+      <div className="mb-4">
+        <label className="block mb-1 font-semibold">Search Professor</label>
+        <input
+          type="text"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          placeholder="Enter professor name"
+          className="w-full p-2 border rounded"
+        />
+        {searchText && searchError && (
+          <p className="text-red-500 mt-1">No professor found.</p>
+        )}
+      </div>
+
+      <div className="my-4 text-center text-gray-500 font-semibold">Or</div>
 
       <select
         value={selection.university}
@@ -136,7 +185,6 @@ export default function Labs() {
             </RadarChart>
           </ResponsiveContainer>
         </div>
-
       )}
     </main>
   );
