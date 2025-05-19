@@ -121,8 +121,8 @@ export default function Labs() {
 
       {selection.professor && averages.length > 0 && (
         <div className="mt-8 flex justify-center">
-          <ResponsiveContainer width={500} height={400}>
-            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+          <ResponsiveContainer width="100%" height={400}>
+            <RadarChart cx="50%" cy="50%" outerRadius="60%" data={data}>
               <PolarGrid />
               <PolarAngleAxis dataKey="subject" />
               <PolarRadiusAxis domain={[0, 5]} />
@@ -136,6 +136,7 @@ export default function Labs() {
             </RadarChart>
           </ResponsiveContainer>
         </div>
+
       )}
     </main>
   );
