@@ -1,6 +1,6 @@
 // pages/labs.tsx
 import { useEffect, useState } from 'react';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadarProps } from 'recharts';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
 import professorHierarchy from '../data/professors_fake';
 
 const categories = [
@@ -117,8 +117,8 @@ export default function Labs() {
       )}
 
       {selection.professor && averages.length > 0 && (
-        <div className="mt-8">
-          <RadarChart outerRadius={120} width={500} height={400} data={data}>
+        <div className="mt-8 flex justify-center">
+          <RadarChart cx="50%" cy="50%" outerRadius={120} width={500} height={400} data={data}>
             <PolarGrid />
             <PolarAngleAxis dataKey="subject" />
             <PolarRadiusAxis domain={[0, 5]} />

@@ -38,7 +38,11 @@ export default function Evaluate() {
     existing[selection.professor] = [...prev, scores];
     localStorage.setItem("evaluations", JSON.stringify(existing));
     alert("Thank you for your evaluation!");
+
+    // 슬라이더 값 초기화
+    setScores(Array(6).fill(3));
   };
+
 
   const getSchools = () => {
     const uni = professorHierarchy.find(u => u.university === selection.university);
