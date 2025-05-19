@@ -1,22 +1,88 @@
 // pages/evaluate.tsx
 import { useState } from 'react';
-import professorHierarchy from '../data/professors_fake';
+
+const professorHierarchy = [
+  {
+    university: "Donut University",
+    schools: [
+      {
+        school: "School of Engineering",
+        departments: [
+          {
+            department: "Electrical Engineering",
+            professors: ["Rasberry"]
+          }
+        ]
+      },
+      {
+        school: "School of Medicine",
+        departments: [
+          {
+            department: "Immunology",
+            professors: ["Chocolate"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    university: "Mango University",
+    schools: [
+      {
+        school: "School of Medicine",
+        departments: [
+          {
+            department: "Nursing",
+            professors: ["Bingsoo"]
+          },
+          {
+            department: "Pharmachology",
+            professors: ["Sticky Rice"]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    university: "Strawberry University",
+    schools: [
+      {
+        school: "Art College",
+        departments: [
+          {
+            department: "Humanity",
+            professors: ["Cake"]
+          }
+        ]
+      },
+      {
+        school: "School of Engineering",
+        departments: [
+          {
+            department: "Computer Science",
+            professors: ["Smoothie"]
+          }
+        ]
+      }
+    ]
+  }
+];
 
 const categories = [
-  'Personal Character',
-  'Lab Environment',
-  'Manuscript Guidance',
-  'Research Direction Setting',
-  'Career Support & Networking',
-  'Recommendation Letter Quality'
+  "Personal Character",
+  "Lab Environment",
+  "Manuscript Guidance",
+  "Research Direction Setting",
+  "Career Support & Networking",
+  "Recommendation Letter Quality"
 ];
 
 export default function Evaluate() {
   const [selection, setSelection] = useState({
-    university: '',
-    school: '',
-    department: '',
-    professor: ''
+    university: "",
+    school: "",
+    department: "",
+    professor: ""
   });
 
   const [scores, setScores] = useState(Array(6).fill(3));
@@ -29,19 +95,15 @@ export default function Evaluate() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!selection.professor) {
-      alert('Please select a professor.');
+      alert("Please select a professor.");
       return;
     }
-
-    const existing = JSON.parse(localStorage.getItem('evaluations') || '{}');
+    const existing = JSON.parse(localStorage.getItem("evaluations") || "{}");
     const prev = existing[selection.professor] || [];
     existing[selection.professor] = [...prev, scores];
-    localStorage.setItem('evaluations', JSON.stringify(existing));
-
-    alert('Thank you for your evaluation!');
-    window.location.href = '/labs';
+    localStorage.setItem("evaluations", JSON.stringify(existing));
+    alert("Thank you for your evaluation!");
   };
 
   const getSchools = () => {
@@ -63,79 +125,56 @@ export default function Evaluate() {
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6">Evaluate a Professor</h1>
 
-      {/* University */}
-      <label className="block mb-4">
-        <span className="block mb-2">Select University</span>
+      <select
+        value={selection.university}
+        onChange={(e) => setSelection({ university: e.target.value, school: '', department: '', professor: '' })}
+        className="w-full p-2 mb-4 border rounded"
+      >
+        <option value="">-- Select University --</option>
+        {professorHierarchy.map((u) => (
+          <option key={u.university} value={u.university}>{u.university}</option>
+        ))}
+      </select>
+
+      {selection.university && (
         <select
-          value={selection.university}
-          onChange={(e) =>
-            setSelection({ university: e.target.value, school: '', department: '', professor: '' })
-          }
-          className="w-full p-2 border rounded"
+          value={selection.school}
+          onChange={(e) => setSelection({ ...selection, school: e.target.value, department: '', professor: '' })}
+          className="w-full p-2 mb-4 border rounded"
         >
-          <option value="">-- Choose --</option>
-          {professorHierarchy.map((u) => (
-            <option key={u.university} value={u.university}>{u.university}</option>
+          <option value="">-- Select School --</option>
+          {getSchools().map((s) => (
+            <option key={s.school} value={s.school}>{s.school}</option>
           ))}
         </select>
-      </label>
-
-      {/* School */}
-      {selection.university && (
-        <label className="block mb-4">
-          <span className="block mb-2">Select School</span>
-          <select
-            value={selection.school}
-            onChange={(e) =>
-              setSelection({ ...selection, school: e.target.value, department: '', professor: '' })
-            }
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Choose --</option>
-            {getSchools().map((s) => (
-              <option key={s.school} value={s.school}>{s.school}</option>
-            ))}
-          </select>
-        </label>
       )}
 
-      {/* Department */}
       {selection.school && (
-        <label className="block mb-4">
-          <span className="block mb-2">Select Department</span>
-          <select
-            value={selection.department}
-            onChange={(e) =>
-              setSelection({ ...selection, department: e.target.value, professor: '' })
-            }
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Choose --</option>
-            {getDepartments().map((d) => (
-              <option key={d.department} value={d.department}>{d.department}</option>
-            ))}
-          </select>
-        </label>
+        <select
+          value={selection.department}
+          onChange={(e) => setSelection({ ...selection, department: e.target.value, professor: '' })}
+          className="w-full p-2 mb-4 border rounded"
+        >
+          <option value="">-- Select Department --</option>
+          {getDepartments().map((d) => (
+            <option key={d.department} value={d.department}>{d.department}</option>
+          ))}
+        </select>
       )}
 
-      {/* Professor */}
       {selection.department && (
-        <label className="block mb-6">
-          <span className="block mb-2">Select Professor</span>
-          <select
-            value={selection.professor}
-            onChange={(e) => setSelection({ ...selection, professor: e.target.value })}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Choose --</option>
-            {getProfessors().map((prof) => (
-              <option key={prof} value={prof}>{prof}</option>
-            ))}
-          </select>
-        </label>
+        <select
+          value={selection.professor}
+          onChange={(e) => setSelection({ ...selection, professor: e.target.value })}
+          className="w-full p-2 mb-6 border rounded"
+        >
+          <option value="">-- Select Professor --</option>
+          {getProfessors().map((prof) => (
+            <option key={prof} value={prof}>{prof}</option>
+          ))}
+        </select>
       )}
 
-      {/* Rating */}
       {selection.professor && (
         <>
           {categories.map((cat, i) => (
@@ -152,10 +191,7 @@ export default function Evaluate() {
               <span>{scores[i]}</span>
             </div>
           ))}
-
-          <button type="submit" className="mt-6 px-4 py-2 bg-black text-white rounded">
-            Submit
-          </button>
+          <button type="submit" className="mt-6 px-4 py-2 bg-black text-white rounded">Submit</button>
         </>
       )}
     </form>
