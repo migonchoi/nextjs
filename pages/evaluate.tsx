@@ -1,6 +1,6 @@
 // pages/evaluate.tsx
 import { useState } from 'react';
-import professorHierarchy from '../data/professors_fake.js';
+import professorHierarchy from '../data/professors_fake';
 
 const categories = [
   'Personal Character',

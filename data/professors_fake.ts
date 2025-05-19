@@ -45,24 +45,4 @@ const professorHierarchy = [
     schools: [
       {
         school: "Art College",
-        departments: [
-          {
-            department: "Humanity",
-            professors: ["Cake"]
-          }
-        ]
-      },
-      {
-        school: "School of Engineering",
-        departments: [
-          {
-            department: "Computer Science",
-            professors: ["Smoothie"]
-          }
-        ]
-      }
-    ]
-  }
-];
-
-export default professorHierarchy;
+        departments:
