@@ -1,6 +1,9 @@
 // pages/labs.tsx
 import { useEffect, useState } from 'react';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
+import {
+  Radar, RadarChart, PolarGrid,
+  PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer
+} from 'recharts';
 import professorHierarchy from '../data/professors_fake';
 
 const categories = [
@@ -63,7 +66,7 @@ export default function Labs() {
   }));
 
   return (
-    <main className="p-8">
+    <main className="p-8 mx-auto max-w-full">
       <h1 className="text-3xl font-bold mb-6">Evaluation Results</h1>
 
       <select
@@ -118,12 +121,20 @@ export default function Labs() {
 
       {selection.professor && averages.length > 0 && (
         <div className="mt-8 flex justify-center">
-          <RadarChart cx="50%" cy="50%" outerRadius={120} width={500} height={400} data={data}>
-            <PolarGrid />
-            <PolarAngleAxis dataKey="subject" />
-            <PolarRadiusAxis domain={[0, 5]} />
-            <Radar name="Avg Score" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
-          </RadarChart>
+          <ResponsiveContainer width={500} height={400}>
+            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={data}>
+              <PolarGrid />
+              <PolarAngleAxis dataKey="subject" />
+              <PolarRadiusAxis domain={[0, 5]} />
+              <Radar
+                name="Avg Score"
+                dataKey="score"
+                stroke="#8884d8"
+                fill="#8884d8"
+                fillOpacity={0.6}
+              />
+            </RadarChart>
+          </ResponsiveContainer>
         </div>
       )}
     </main>
