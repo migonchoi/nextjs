@@ -1,3 +1,6 @@
+console.log("🎯 THIS IS MIGON'S REAL evaluate.tsx LOADED");
+
+
 // pages/evaluate.tsx
 import { useState } from 'react';
 
