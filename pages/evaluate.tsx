@@ -1,6 +1,6 @@
 // pages/evaluate.tsx
 import { useState } from 'react';
-import professors from '../data/professors _ fake.json';
+import professors from '../data/professors_fake.json';
 
 const categories = [
   'Personal Character',
