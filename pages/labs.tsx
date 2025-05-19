@@ -1,7 +1,7 @@
 // pages/labs.tsx
 import { useEffect, useState } from 'react';
-import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts';
-import professorHierarchy from '../data/professor_hierarchy';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, RadarProps } from 'recharts';
+import professorHierarchy from '../data/professors_fake';
 
 const categories = [
   'Personal Character',
@@ -13,22 +13,35 @@ const categories = [
 ];
 
 export default function Labs() {
-  const [selectedUni, setSelectedUni] = useState('');
-  const [selectedSchool, setSelectedSchool] = useState('');
-  const [selectedDept, setSelectedDept] = useState('');
-  const [selectedProf, setSelectedProf] = useState('');
+  const [selection, setSelection] = useState({
+    university: '',
+    school: '',
+    department: '',
+    professor: ''
+  });
   const [averages, setAverages] = useState<number[]>([]);
 
-  const schools = professorHierarchy.find(u => u.university === selectedUni)?.schools || [];
-  const departments = schools.find(s => s.school === selectedSchool)?.departments || [];
-  const professors = departments.find(d => d.department === selectedDept)?.professors || [];
+  const getSchools = () => {
+    const uni = professorHierarchy.find(u => u.university === selection.university);
+    return uni ? uni.schools : [];
+  };
+
+  const getDepartments = () => {
+    const school = getSchools().find(s => s.school === selection.school);
+    return school ? school.departments : [];
+  };
+
+  const getProfessors = () => {
+    const dept = getDepartments().find(d => d.department === selection.department);
+    return dept ? dept.professors : [];
+  };
 
   useEffect(() => {
-    if (!selectedProf) return;
+    if (!selection.professor) return;
     const stored = localStorage.getItem('evaluations');
     if (stored) {
       const parsed = JSON.parse(stored);
-      const allScores = parsed[selectedProf] || [];
+      const allScores = parsed[selection.professor] || [];
       if (allScores.length > 0) {
         const avg = Array(6).fill(0);
         allScores.forEach((scores: number[]) => {
@@ -42,69 +55,77 @@ export default function Labs() {
         setAverages([]);
       }
     }
-  }, [selectedProf]);
+  }, [selection.professor]);
 
   const data = categories.map((subject, i) => ({
     subject,
-    A: averages[i] || 0,
+    score: averages[i] || 0
   }));
 
   return (
     <main className="p-8">
       <h1 className="text-3xl font-bold mb-6">Evaluation Results</h1>
 
-      {/* University Dropdown */}
-      <label className="block mb-4">
-        <span className="block mb-2">Select University</span>
-        <select value={selectedUni} onChange={(e) => {
-          setSelectedUni(e.target.value);
-          setSelectedSchool('');
-          setSelectedDept('');
-          setSelectedProf('');
-        }} className="w-full p-2 border rounded">
-          <option value="">-- Choose --</option>
-          {professorHierarchy.map((u) => (
-            <option key={u.university} value={u.university}>{u.university}</option>
+      <select
+        value={selection.university}
+        onChange={(e) => setSelection({ university: e.target.value, school: '', department: '', professor: '' })}
+        className="w-full p-2 mb-4 border rounded"
+      >
+        <option value="">-- Select University --</option>
+        {professorHierarchy.map((u) => (
+          <option key={u.university} value={u.university}>{u.university}</option>
+        ))}
+      </select>
+
+      {selection.university && (
+        <select
+          value={selection.school}
+          onChange={(e) => setSelection({ ...selection, school: e.target.value, department: '', professor: '' })}
+          className="w-full p-2 mb-4 border rounded"
+        >
+          <option value="">-- Select School --</option>
+          {getSchools().map((s) => (
+            <option key={s.school} value={s.school}>{s.school}</option>
           ))}
         </select>
-      </label>
-
-      {/* School Dropdown */}
-      {selectedUni && (
-        <label className="block mb-4">
-          <span className="block mb-2">Select School</span>
-          <select value={selectedSchool} onChange={(e) => {
-            setSelectedSchool(e.target.value);
-            setSelectedDept('');
-            setSelectedProf('');
-          }} className="w-full p-2 border rounded">
-            <option value="">-- Choose --</option>
-            {schools.map((s) => (
-              <option key={s.school} value={s.school}>{s.school}</option>
-            ))}
-          </select>
-        </label>
       )}
 
-      {/* Department Dropdown */}
-      {selectedSchool && (
-        <label className="block mb-4">
-          <span className="block mb-2">Select Department</span>
-          <select value={selectedDept} onChange={(e) => {
-            setSelectedDept(e.target.value);
-            setSelectedProf('');
-          }} className="w-full p-2 border rounded">
-            <option value="">-- Choose --</option>
-            {departments.map((d) => (
-              <option key={d.department} value={d.department}>{d.department}</option>
-            ))}
-          </select>
-        </label>
+      {selection.school && (
+        <select
+          value={selection.department}
+          onChange={(e) => setSelection({ ...selection, department: e.target.value, professor: '' })}
+          className="w-full p-2 mb-4 border rounded"
+        >
+          <option value="">-- Select Department --</option>
+          {getDepartments().map((d) => (
+            <option key={d.department} value={d.department}>{d.department}</option>
+          ))}
+        </select>
       )}
 
-      {/* Professor Dropdown */}
-      {selectedDept && (
-        <label className="block mb-6 max-w-sm">
-          <span className="block mb-2">Select Professor</span>
-          <select
-            v
+      {selection.department && (
+        <select
+          value={selection.professor}
+          onChange={(e) => setSelection({ ...selection, professor: e.target.value })}
+          className="w-full p-2 mb-6 border rounded"
+        >
+          <option value="">-- Select Professor --</option>
+          {getProfessors().map((prof) => (
+            <option key={prof} value={prof}>{prof}</option>
+          ))}
+        </select>
+      )}
+
+      {selection.professor && averages.length > 0 && (
+        <div className="mt-8">
+          <RadarChart outerRadius={120} width={500} height={400} data={data}>
+            <PolarGrid />
+            <PolarAngleAxis dataKey="subject" />
+            <PolarRadiusAxis domain={[0, 5]} />
+            <Radar name="Avg Score" dataKey="score" stroke="#8884d8" fill="#8884d8" fillOpacity={0.6} />
+          </RadarChart>
+        </div>
+      )}
+    </main>
+  );
+}
