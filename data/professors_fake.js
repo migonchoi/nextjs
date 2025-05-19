@@ -1,4 +1,3 @@
-// data/professors_fake.ts
 const professorHierarchy = [
   {
     university: "Donut University",
