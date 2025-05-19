@@ -25,6 +25,7 @@ export default function Labs() {
   const [averages, setAverages] = useState<number[]>([]);
   const [searchText, setSearchText] = useState("");
   const [searchError, setSearchError] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   const allProfessors = professorHierarchy.flatMap(u =>
     u.schools.flatMap(s =>
@@ -38,6 +39,17 @@ export default function Labs() {
       )
     )
   );
+
+  useEffect(() => {
+    if (!searchText.trim()) {
+      setSuggestions([]);
+      return;
+    }
+    const matches = allProfessors.filter(p =>
+      p.name.toLowerCase().startsWith(searchText.trim().toLowerCase())
+    );
+    setSuggestions(matches);
+  }, [searchText]);
 
   useEffect(() => {
     if (!selection.professor) return;
@@ -60,23 +72,17 @@ export default function Labs() {
     }
   }, [selection.professor]);
 
-  useEffect(() => {
-    if (!searchText.trim()) return;
-    const match = allProfessors.find(p =>
-      p.name.toLowerCase() === searchText.trim().toLowerCase()
-    );
-    if (match) {
-      setSelection({
-        university: match.university,
-        school: match.school,
-        department: match.department,
-        professor: match.name
-      });
-      setSearchError(false);
-    } else {
-      setSearchError(true);
-    }
-  }, [searchText]);
+  const handleSuggestionClick = (prof: any) => {
+    setSelection({
+      university: prof.university,
+      school: prof.school,
+      department: prof.department,
+      professor: prof.name
+    });
+    setSearchText(prof.name);
+    setSuggestions([]);
+    setSearchError(false);
+  };
 
   const getSchools = () => {
     const uni = professorHierarchy.find(u => u.university === selection.university);
@@ -102,7 +108,7 @@ export default function Labs() {
     <main className="p-8 mx-auto max-w-full">
       <h1 className="text-3xl font-bold mb-6">Evaluation Results</h1>
 
-      <div className="mb-4">
+      <div className="mb-4 relative">
         <label className="block mb-1 font-semibold">Search Professor</label>
         <input
           type="text"
@@ -111,7 +117,20 @@ export default function Labs() {
           placeholder="Enter professor name"
           className="w-full p-2 border rounded"
         />
-        {searchText && searchError && (
+        {suggestions.length > 0 && (
+          <ul className="absolute bg-white border rounded w-full z-10 mt-1 max-h-40 overflow-y-auto">
+            {suggestions.map((sug, index) => (
+              <li
+                key={index}
+                onClick={() => handleSuggestionClick(sug)}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              >
+                {sug.name} ({sug.university})
+              </li>
+            ))}
+          </ul>
+        )}
+        {searchText && suggestions.length === 0 && (
           <p className="text-red-500 mt-1">No professor found.</p>
         )}
       </div>

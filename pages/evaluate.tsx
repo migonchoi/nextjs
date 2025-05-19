@@ -20,7 +20,7 @@ export default function Evaluate() {
   });
   const [scores, setScores] = useState(Array(6).fill(3));
   const [searchText, setSearchText] = useState("");
-  const [searchError, setSearchError] = useState(false);
+  const [suggestions, setSuggestions] = useState<any[]>([]);
 
   const allProfessors = professorHierarchy.flatMap(u =>
     u.schools.flatMap(s =>
@@ -36,22 +36,26 @@ export default function Evaluate() {
   );
 
   useEffect(() => {
-    if (!searchText.trim()) return;
-    const match = allProfessors.find(p =>
-      p.name.toLowerCase() === searchText.trim().toLowerCase()
-    );
-    if (match) {
-      setSelection({
-        university: match.university,
-        school: match.school,
-        department: match.department,
-        professor: match.name
-      });
-      setSearchError(false);
-    } else {
-      setSearchError(true);
+    if (!searchText.trim()) {
+      setSuggestions([]);
+      return;
     }
+    const matches = allProfessors.filter(p =>
+      p.name.toLowerCase().startsWith(searchText.trim().toLowerCase())
+    );
+    setSuggestions(matches);
   }, [searchText]);
+
+  const handleSuggestionClick = (prof: any) => {
+    setSelection({
+      university: prof.university,
+      school: prof.school,
+      department: prof.department,
+      professor: prof.name
+    });
+    setSearchText(prof.name);
+    setSuggestions([]);
+  };
 
   const handleScoreChange = (index: number, value: number) => {
     const updated = [...scores];
@@ -92,7 +96,7 @@ export default function Evaluate() {
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto p-8">
       <h1 className="text-3xl font-bold mb-6">Evaluate a Professor</h1>
 
-      <div className="mb-4">
+      <div className="mb-4 relative">
         <label className="block mb-1 font-semibold">Search Professor</label>
         <input
           type="text"
@@ -101,7 +105,20 @@ export default function Evaluate() {
           placeholder="Enter professor name"
           className="w-full p-2 border rounded"
         />
-        {searchText && searchError && (
+        {suggestions.length > 0 && (
+          <ul className="absolute bg-white border rounded w-full z-10 mt-1 max-h-40 overflow-y-auto">
+            {suggestions.map((sug, index) => (
+              <li
+                key={index}
+                onClick={() => handleSuggestionClick(sug)}
+                className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+              >
+                {sug.name} ({sug.university})
+              </li>
+            ))}
+          </ul>
+        )}
+        {searchText && suggestions.length === 0 && (
           <p className="text-red-500 mt-1">No professor found.</p>
         )}
       </div>
